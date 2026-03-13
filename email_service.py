@@ -96,11 +96,11 @@ class AzureMS365Provider(EmailProvider):
                 raise Exception(f"Failed to send email via Graph API: {response.text}")
             return response.json() if response.content else None
 
-def get_email_provider():
-    provider_type = os.getenv("EMAIL_PROVIDER", "gmail").lower()
-    if provider_type == "gmail":
-        print("Using GmailProvider")
+def get_email_provider(recipient_email: str):
+    email_lower = recipient_email.lower().strip()
+    if email_lower.endswith("@gmail.com"):
+        print(f"Routing to GmailProvider for {recipient_email}")
         return GmailProvider()
     else:
-        print("Using AzureMS365Provider")
+        print(f"Routing to AzureMS365Provider for {recipient_email}")
         return AzureMS365Provider()

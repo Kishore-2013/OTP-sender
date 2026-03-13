@@ -106,7 +106,7 @@ async def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     print(f"[send-otp] OTP signed for {email}")
 
     try:
-        provider = get_email_provider()
+        provider = get_email_provider(email)
         background_tasks.add_task(provider.send_otp, email, otp_code)
         # Return token to Flutter — Flutter holds it and sends back on verify
         return {"message": "OTP sent successfully", "token": token}

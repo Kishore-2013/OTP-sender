@@ -1,0 +1,7 @@
+TO: test@example.com
+SUBJECT: LinkSpec Verification Code
+DATE: Fri Mar 13 08:50:48 2026
+----------------------------------------
+Your verification code is: 430115
+It will expire in 5 minutes.
+----------------------------------------
