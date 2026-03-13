@@ -11,6 +11,10 @@ import hmac
 import hashlib
 import base64
 from email_service import get_email_provider
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # ── Secret key for signing tokens (set OTP_SECRET_KEY in Vercel env vars) ─────
 OTP_SECRET = os.getenv("OTP_SECRET_KEY", "linkspec-otp-default-secret")
@@ -102,7 +106,7 @@ async def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
     print(f"[send-otp] OTP signed for {email}")
 
     try:
-        provider = get_email_provider(email)
+        provider = get_email_provider()
         background_tasks.add_task(provider.send_otp, email, otp_code)
         # Return token to Flutter — Flutter holds it and sends back on verify
         return {"message": "OTP sent successfully", "token": token}

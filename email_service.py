@@ -15,8 +15,8 @@ class EmailProvider(ABC):
 
 class GmailProvider(EmailProvider):
     def __init__(self):
-        self.user = os.getenv("GMAIL_USER")
-        self.password = os.getenv("GMAIL_APP_PASSWORD")
+        self.user = os.getenv("GMAIL_USER", "")
+        self.password = os.getenv("GMAIL_APP_PASSWORD", "")
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
 
@@ -43,10 +43,10 @@ class GmailProvider(EmailProvider):
 
 class AzureMS365Provider(EmailProvider):
     def __init__(self):
-        self.tenant_id = os.getenv("MS365_TENANT_ID")
-        self.client_id = os.getenv("MS365_CLIENT_ID")
-        self.client_secret = os.getenv("MS365_CLIENT_SECRET")
-        self.sender_email = os.getenv("SENDER_EMAIL")
+        self.tenant_id = os.getenv("MS365_TENANT_ID", "")
+        self.client_id = os.getenv("MS365_CLIENT_ID", "")
+        self.client_secret = os.getenv("MS365_CLIENT_SECRET", "")
+        self.sender_email = os.getenv("SENDER_EMAIL", "")
         self.authority = f"https://login.microsoftonline.com/{self.tenant_id}"
         self.scope = ["https://graph.microsoft.com/.default"]
 
@@ -96,11 +96,11 @@ class AzureMS365Provider(EmailProvider):
                 raise Exception(f"Failed to send email via Graph API: {response.text}")
             return response.json() if response.content else None
 
-def get_email_provider(recipient_email: str):
-    email_lower = recipient_email.lower()
-    if email_lower.endswith("@gmail.com"):
-        print(f"Routing to GmailProvider for {recipient_email}")
+def get_email_provider():
+    provider_type = os.getenv("EMAIL_PROVIDER", "gmail").lower()
+    if provider_type == "gmail":
+        print("Using GmailProvider")
         return GmailProvider()
     else:
-        print(f"Routing to AzureMS365Provider for {recipient_email}")
+        print("Using AzureMS365Provider")
         return AzureMS365Provider()

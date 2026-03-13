@@ -50,7 +50,8 @@ A secure FastAPI-based OTP verification service supporting multiple email provid
 ```json
 {
   "email": "user@example.com",
-  "otp_code": "123456"
+  "otp_code": "123456",
+  "token": "eyJlbWFpbCI6ICJ1c2VyQGV4YW1wbGUuY29tIiwgIm90cCI6ICIxMjM0NTYiLCAiZXhwIjogMTcxMDUwMDAwMH0.signature"
 }
 ```
 
@@ -58,11 +59,19 @@ A secure FastAPI-based OTP verification service supporting multiple email provid
 
 ### Option A: Using PowerShell (Recommended for Windows)
 ```powershell
-# Send OTP
-Invoke-RestMethod -Uri http://127.0.0.1:8000/send-otp -Method Post -ContentType "application/json" -Body '{"email":"your-email@example.com"}'
+# 1. Send OTP & Save the token
+$response = Invoke-RestMethod -Uri http://127.0.0.1:8000/send-otp -Method Post -ContentType "application/json" -Body '{"email":"22211A1121@gmail.com"}'
+$token = $response.token
+Write-Host "Token received: $token"
 
-# Verify OTP
-Invoke-RestMethod -Uri http://127.0.0.1:8000/verify-otp -Method Post -ContentType "application/json" -Body '{"email":"your-email@example.com", "otp_code":"123456"}'
+# 2. Verify OTP using the token
+$body = @{
+    email = "22211A1121@gmail.com"
+    otp_code = "123456" # Replace with the code you received
+    token = $token
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri http://127.0.0.1:8000/verify-otp -Method Post -ContentType "application/json" -Body $body
 ```
 
 ### Option B: Using curl.exe (Windows 10+)
