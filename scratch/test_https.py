@@ -3,7 +3,7 @@ import json
 
 url = "https://localhost:8443/send-otp"
 data = {
-    "email": "test@gmail.com",
+    "email": "[EMAIL_ADDRESS]",
     "type": "work_email_verification"
 }
 
