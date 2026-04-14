@@ -72,6 +72,7 @@ app.add_middleware(
 
 class OTPRequest(BaseModel):
     email: EmailStr
+    type: str = "signup_verification"
 
 class OTPVerifyRequest(BaseModel):
     email: EmailStr
@@ -107,7 +108,7 @@ async def send_otp(request: OTPRequest, background_tasks: BackgroundTasks):
 
     try:
         provider = get_email_provider(email)
-        background_tasks.add_task(provider.send_otp, email, otp_code)
+        background_tasks.add_task(provider.send_otp, email, otp_code, request.type)
         # Return token to Flutter — Flutter holds it and sends back on verify
         return {"message": "OTP sent successfully", "token": token}
     except Exception as e:

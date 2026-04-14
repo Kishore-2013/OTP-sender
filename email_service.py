@@ -10,7 +10,7 @@ load_dotenv()
 
 class EmailProvider(ABC):
     @abstractmethod
-    def send_otp(self, recipient_email: str, otp_code: str):
+    def send_otp(self, recipient_email: str, otp_code: str, email_type: str = "signup_verification"):
         pass
 
 class GmailProvider(EmailProvider):
@@ -20,15 +20,21 @@ class GmailProvider(EmailProvider):
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
 
-    def send_otp(self, recipient_email: str, otp_code: str):
+    def send_otp(self, recipient_email: str, otp_code: str, email_type: str = "signup_verification"):
         try:
-            print(f"--- [DEBUG] Attempting to send Gmail OTP to {recipient_email} ---")
+            print(f"--- [DEBUG] Attempting to send Gmail OTP ({email_type}) to {recipient_email} ---")
             msg = MIMEMultipart()
             msg['From'] = self.user
             msg['To'] = recipient_email
-            msg['Subject'] = "Your LinkSpec Verification Code"
 
-            body = f"Your verification code is: {otp_code}. It will expire in 5 minutes."
+            if email_type == "work_email_verification":
+                msg['Subject'] = "Verify your work email - Linkspec"
+                body = f"Your OTP for work email verification is: {otp_code}\nThis OTP will expire in 5 minutes."
+            else:
+                # Default: signup_verification
+                msg['Subject'] = "Your LinkSpec Verification Code"
+                body = f"Your verification code is: {otp_code}. It will expire in 5 minutes."
+
             msg.attach(MIMEText(body, 'plain'))
 
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
@@ -63,7 +69,7 @@ class AzureMS365Provider(EmailProvider):
         else:
             raise Exception(f"Failed to acquire token: {result.get('error_description')}")
 
-    def send_otp(self, recipient_email: str, otp_code: str):
+    def send_otp(self, recipient_email: str, otp_code: str, email_type: str = "signup_verification"):
         import httpx
         access_token = self._get_access_token()
         
@@ -72,13 +78,21 @@ class AzureMS365Provider(EmailProvider):
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
         }
+
+        if email_type == "work_email_verification":
+            subject = "Verify your work email - Linkspec"
+            content = f"Your OTP for work email verification is: {otp_code}\nThis OTP will expire in 5 minutes."
+        else:
+            # Default: signup_verification
+            subject = "Your LinkSpec Verification Code"
+            content = f"Your verification code is: {otp_code}. It will expire in 5 minutes."
         
         email_body = {
             "message": {
-                "subject": "Your LinkSpec Verification Code",
+                "subject": subject,
                 "body": {
                     "contentType": "Text",
-                    "content": f"Your verification code is: {otp_code}. It will expire in 5 minutes."
+                    "content": content
                 },
                 "toRecipients": [
                     {
